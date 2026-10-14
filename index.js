@@ -3,7 +3,7 @@ import { saveSettingsDebounced } from "../../../../script.js";
 
 const KEY = "gd_music_player";
 const API = "https://music-api.gdstudio.xyz/api.php";
-const defaults = { source: "netease", br: "320", proxy: false, open: false };
+const defaults = { source: "spotify", br: "320", proxy: false, open: false };
 const st = { results: [], idx: -1, lines: [], cur: -1 };
 const $id = (id) => document.getElementById(id);
 
@@ -127,6 +127,12 @@ function buildUI() {
     panel.innerHTML = `
         <div class="gdm-row">
             <input id="gdm-q" class="text_pole" type="search" placeholder="歌名或歌手">
+            <select id="gdm-src" class="text_pole" style="flex:0 0 auto;width:auto">
+                <option value="spotify">spotify</option>
+                <option value="netease">netease</option>
+                <option value="joox">joox</option>
+                <option value="bilibili">bilibili</option>
+            </select>
             <button id="gdm-go" class="menu_button">搜尋</button>
         </div>
         <ul id="gdm-list"></ul>
@@ -134,6 +140,13 @@ function buildUI() {
         <div id="gdm-lyrics"></div>
         <audio id="gdm-au" controls></audio>`;
     document.body.append(fab, panel);
+    $id("gdm-src").value = c.source;
+    $id("gdm-src").onchange = (e) => {
+        cfg().source = e.target.value;
+        const o = $id("gdm-set-src");
+        if (o) o.value = e.target.value;
+        saveSettingsDebounced();
+    };
     $id("gdm-go").onclick = search;
     $id("gdm-q").addEventListener("keydown", (e) => { if (e.key === "Enter") search(); });
     $id("gdm-au").addEventListener("timeupdate", onTime);
@@ -152,9 +165,11 @@ function buildSettings() {
         <div class="inline-drawer-content">
             <label>音源
                 <select id="gdm-set-src" class="text_pole">
+                    <option value="spotify">spotify</option>
                     <option value="netease">netease</option>
                     <option value="joox">joox</option>
                     <option value="bilibili">bilibili</option>
+                    <option value="spotify">spotify（不穩定）</option>
                 </select>
             </label>
             <label>音質
@@ -174,7 +189,7 @@ function buildSettings() {
     $id("gdm-set-src").value = c.source;
     $id("gdm-set-br").value = c.br;
     $id("gdm-set-proxy").checked = c.proxy;
-    $id("gdm-set-src").onchange = (e) => { cfg().source = e.target.value; saveSettingsDebounced(); };
+    $id("gdm-set-src").onchange = (e) => { cfg().source = e.target.value; $id("gdm-src").value = e.target.value; saveSettingsDebounced(); };
     $id("gdm-set-br").onchange = (e) => { cfg().br = e.target.value; saveSettingsDebounced(); };
     $id("gdm-set-proxy").onchange = (e) => { cfg().proxy = e.target.checked; saveSettingsDebounced(); };
 }
