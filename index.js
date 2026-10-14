@@ -16,8 +16,11 @@ async function call(params) {
     const c = cfg();
     const url = API + "?" + new URLSearchParams(params);
     const r = await fetch(c.proxy ? `${location.origin}/proxy/${url}` : url);
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
+    const txt = await r.text();
+    const brief = txt.slice(0, 80).replace(/\s+/g, " ");
+    if (!r.ok) throw new Error("HTTP " + r.status + " " + brief);
+    try { return JSON.parse(txt); }
+    catch (e) { throw new Error("回應不是 JSON：" + brief); }
 }
 
 const artistOf = (t) => (Array.isArray(t.artist) ? t.artist.join(" / ") : t.artist);
